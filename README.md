@@ -47,6 +47,64 @@ signals = model.generate_signals(data, predictions)
 print(signals.tail(10))  # View recent signals
 ```
 
+
+## 🌐 Backend API (Image Endpoint)
+
+A lightweight Python backend is included to receive uploaded diagram images (like the one you shared) and return validated image metadata.
+
+### Run the backend
+
+```bash
+python backend/server.py
+```
+
+### Working endpoint
+
+- **Health check**: `GET /health`
+- **Image upload endpoint**: `POST /api/v1/diagram/analyze`
+- **GLM-5 interpretation endpoint**: `POST /api/v1/diagram/interpret`
+
+Example request:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/diagram/analyze" \
+  -F "file=@your-image.png"
+```
+
+Example response includes:
+- uploaded filename and file content type
+- byte size and SHA-256 checksum
+- detected image type (PNG/JPEG)
+- extracted width, height, and aspect ratio
+
+You can run a local validation check:
+
+```bash
+python backend/smoke_test.py
+```
+
+
+### Use GLM-5 API (NVIDIA integrate endpoint)
+
+Set your API key:
+
+```bash
+export NVIDIA_API_KEY="your-nvidia-api-key"
+```
+
+Call interpretation endpoint:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/diagram/interpret" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Summarize this diagram in simple language",
+    "image_b64": "<base64-encoded-image>"
+  }'
+```
+
+This backend forwards the request to `https://integrate.api.nvidia.com/v1/chat/completions` using model `z-ai/glm5`.
+
 ## 📁 Project Structure
 
 ```
